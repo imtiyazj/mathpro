@@ -1,13 +1,26 @@
-/* General Body Styling */
+/* General Page Layout */
+html,
+body,
+#root {
+  width: 100%;
+}
+
 body {
   font-family: 'Arial Rounded MT Bold', 'Helvetica Rounded', Arial, sans-serif;
   background-color: #f0f8ff; /* AliceBlue */
   color: #333;
+  min-height: 100dvh;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+#root {
+  min-height: 100dvh;
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  min-height: 100dvh;
-  margin: 0;
   padding: clamp(10px, 2.2vh, 20px);
   box-sizing: border-box;
 }
