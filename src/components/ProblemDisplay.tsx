@@ -9,7 +9,7 @@ import { playFeedbackVoice } from '../utils/feedbackVoice';
 
 interface ProblemDisplayProps {
   module: LearningModule;
-  onCorrectAnswer: () => void;
+  onCorrectAnswer: (pointsEarned: number) => void;
 }
 
 interface PersonState {
@@ -84,7 +84,7 @@ function ProblemDisplay({ module, onCorrectAnswer }: ProblemDisplayProps) {
     playFeedbackVoice(true);
     if (!answeredCorrectly) {
       setAnsweredCorrectly(true);
-      onCorrectAnswer();
+      onCorrectAnswer(module.pointsPerSolve ?? 1);
     }
   };
 
@@ -217,6 +217,15 @@ function TwoWaysBuilder({ data, value, onChange }: TwoWaysBuilderProps) {
     updatePerson(person, { draggedOnes: value[person].draggedOnes + 1 });
   };
 
+  const adjustToken = (person: 'first' | 'second', token: 'ten' | 'one', delta: 1 | -1) => {
+    if (token === 'ten') {
+      updatePerson(person, { draggedTens: Math.max(0, value[person].draggedTens + delta) });
+      return;
+    }
+
+    updatePerson(person, { draggedOnes: Math.max(0, value[person].draggedOnes + delta) });
+  };
+
   const handleDrop = (person: 'first' | 'second', token: 'ten' | 'one') => (event: DragEvent<HTMLDivElement>) => {
     event.preventDefault();
     const dropped = event.dataTransfer.getData('text/plain');
@@ -274,6 +283,39 @@ function TwoWaysBuilder({ data, value, onChange }: TwoWaysBuilderProps) {
               ))}
             </div>
           </div>
+        </div>
+
+        <div className="quick-token-actions" aria-label={`${name} quick model controls`}>
+          <button
+            type="button"
+            className="quick-token-button"
+            onClick={() => addToken(person, 'ten')}
+          >
+            + Stick
+          </button>
+          <button
+            type="button"
+            className="quick-token-button"
+            onClick={() => addToken(person, 'one')}
+          >
+            + Dot
+          </button>
+          <button
+            type="button"
+            className="quick-token-button quick-token-button-secondary"
+            onClick={() => adjustToken(person, 'ten', -1)}
+            disabled={value[person].draggedTens === 0}
+          >
+            - Stick
+          </button>
+          <button
+            type="button"
+            className="quick-token-button quick-token-button-secondary"
+            onClick={() => adjustToken(person, 'one', -1)}
+            disabled={value[person].draggedOnes === 0}
+          >
+            - Dot
+          </button>
         </div>
 
         <button

@@ -477,6 +477,40 @@ h2 {
   line-height: 1;
 }
 
+.quick-token-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.quick-token-button {
+  border: 2px solid #b7d5ea;
+  background: #edf7ff;
+  color: #1f4f73;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.quick-token-button:hover {
+  background: #dff0fe;
+}
+
+.quick-token-button.quick-token-button-secondary {
+  background: #f4f7fa;
+  color: #355066;
+}
+
+.quick-token-button:disabled {
+  background: #eef3f7;
+  color: #91a2b1;
+  border-color: #d6e0e8;
+  cursor: not-allowed;
+}
+
 .count-inputs {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

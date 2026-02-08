@@ -49,19 +49,19 @@ function App() {
     setSelectedModuleId(moduleId);
   };
 
-  const handleCorrectAnswer = () => {
+  const handleCorrectAnswer = (pointsEarned: number) => {
     setRewards((current) => {
-      let points = current.points + 1;
+      let points = current.points + pointsEarned;
       let medals = current.medals;
       let trophies = current.trophies;
 
-      if (points >= 5) {
-        points = 0;
+      while (points >= 5) {
+        points -= 5;
         medals += 1;
       }
 
-      if (medals >= 5) {
-        medals = 0;
+      while (medals >= 5) {
+        medals -= 5;
         trophies += 1;
       }
 

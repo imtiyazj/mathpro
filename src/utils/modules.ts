@@ -11,6 +11,7 @@ export interface LearningModule {
   title: string;
   description: string;
   generator: () => MathProblem;
+  pointsPerSolve?: number;
 }
 
 export const LEARNING_MODULES: LearningModule[] = [
@@ -37,6 +38,7 @@ export const LEARNING_MODULES: LearningModule[] = [
     title: 'Drag and Drop',
     description: 'Build two different tens/ones models.',
     generator: generateDragAndDropProblem,
+    pointsPerSolve: 2,
   },
 ];
 
