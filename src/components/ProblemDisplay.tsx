@@ -6,6 +6,7 @@ import {
   generateBaseTenBlocksProblem,
   generateNumberBondProblem,
 } from '../utils/problemGenerators';
+import { playFeedbackVoice } from '../utils/feedbackVoice';
 
 interface ProblemDisplayProps {
   category: string;
@@ -43,8 +44,10 @@ function ProblemDisplay({ category }: ProblemDisplayProps) {
 
     if (answerToCheck === currentProblem.answer) {
       setFeedback('Correct!');
+      playFeedbackVoice(true);
     } else {
       setFeedback(`Incorrect. The answer was ${currentProblem.answer}.`);
+      playFeedbackVoice(false);
     }
   };
 
