@@ -1,0 +1,248 @@
+/* General Body Styling */
+body {
+  font-family: 'Arial Rounded MT Bold', 'Helvetica Rounded', Arial, sans-serif;
+  background-color: #f0f8ff; /* AliceBlue */
+  color: #333;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  margin: 0;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+/* App Container */
+.mathpro-container {
+  background-color: #fff;
+  border-radius: 20px;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+  padding: 40px;
+  text-align: center;
+  max-width: 600px;
+  width: 100%;
+}
+
+h1 {
+  color: #ff6347; /* Tomato */
+  margin-bottom: 30px;
+  font-size: 2.5em;
+  text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+}
+
+h2 {
+  color: #4682b4; /* SteelBlue */
+  margin-bottom: 20px;
+  font-size: 1.8em;
+}
+
+/* Category Selection */
+.category-selection .category-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.category-selection button,
+.problem-actions button {
+  background-color: #ffd700; /* Gold */
+  color: #333;
+  border: none;
+  border-radius: 10px;
+  padding: 15px 25px;
+  font-size: 1.2em;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.category-selection button:hover,
+.problem-actions button:hover {
+  background-color: #ffa500; /* Orange */
+  transform: translateY(-2px);
+}
+
+.category-selection button:active,
+.problem-actions button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Problem Display */
+.problem-display .problem-question {
+  font-size: 3em;
+  margin: 30px 0;
+  color: #32cd32; /* LimeGreen */
+  font-weight: bold;
+}
+
+.problem-display .problem-input {
+  width: 80%;
+  max-width: 200px;
+  padding: 15px;
+  font-size: 2em;
+  text-align: center;
+  border: 3px solid #4682b4; /* SteelBlue */
+  border-radius: 10px;
+  margin-bottom: 20px;
+  outline: none;
+}
+
+.problem-display .problem-input:focus {
+  border-color: #ff6347; /* Tomato */
+  box-shadow: 0 0 8px rgba(255, 99, 71, 0.5);
+}
+
+.problem-actions {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.problem-actions .submit-button {
+  background-color: #32cd32; /* LimeGreen */
+  color: white;
+}
+
+.problem-actions .submit-button:hover {
+  background-color: #228b22; /* ForestGreen */
+}
+
+.problem-actions .new-problem-button {
+  background-color: #8a2be2; /* BlueViolet */
+  color: white;
+}
+
+.problem-actions .new-problem-button:hover {
+  background-color: #6a0dad; /* DarkViolet */
+}
+
+.choice-options {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 20px 0;
+}
+
+.choice-button {
+  background-color: #fff;
+  border: 2px solid #4682b4;
+  color: #1f4f73;
+  border-radius: 10px;
+  min-width: 96px;
+  padding: 10px 14px;
+  font-size: 1.25em;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.choice-button:hover {
+  background-color: #e9f4fc;
+}
+
+.base-ten-visual {
+  background: #f6fbf3;
+  border: 2px solid #d8e8cf;
+  border-radius: 14px;
+  padding: 16px;
+  margin: 20px auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 440px;
+}
+
+.hundreds-group,
+.tens-group,
+.ones-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+
+.hundred-block {
+  width: 58px;
+  height: 58px;
+  border: 1px solid #5f9a4d;
+  border-radius: 3px;
+  background:
+    linear-gradient(to right, rgba(95, 154, 77, 0.35) 1px, transparent 1px) 0 0 / 5.8px 5.8px,
+    linear-gradient(to bottom, rgba(95, 154, 77, 0.35) 1px, transparent 1px) 0 0 / 5.8px 5.8px,
+    #98c97d;
+}
+
+.ten-rod {
+  width: 16px;
+  display: grid;
+  grid-template-rows: repeat(10, 1fr);
+  border: 1px solid #5f9a4d;
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.unit-cell,
+.one-cube {
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  display: block;
+  border: 1px solid rgba(95, 154, 77, 0.55);
+  background: #98c97d;
+  box-sizing: border-box;
+}
+
+.ones-group {
+  min-height: 16px;
+}
+
+.one-cube {
+  width: 16px;
+}
+
+/* Feedback */
+.feedback {
+  margin-top: 20px;
+  font-size: 1.5em;
+  font-weight: bold;
+}
+
+.feedback.correct {
+  color: #228b22; /* ForestGreen */
+}
+
+.feedback.incorrect {
+  color: #dc143c; /* Crimson */
+}
+
+/* Back to Categories Button */
+.mathpro-container > button { /* Targeting the 'Back to Categories' button in App.tsx */
+  background-color: #4682b4; /* SteelBlue */
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 10px 20px;
+  font-size: 1em;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.mathpro-container > button:hover {
+  background-color: #5f9ea0; /* CadetBlue */
+  transform: translateY(-2px);
+}
+
+@media (max-width: 600px) {
+  .mathpro-container {
+    padding: 24px 16px;
+  }
+
+  .problem-display .problem-question {
+    font-size: 2.2em;
+  }
+}
