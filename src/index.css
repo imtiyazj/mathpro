@@ -43,6 +43,26 @@ h2 {
   gap: 15px;
 }
 
+.category-selection button {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: flex-start;
+  text-align: left;
+}
+
+.category-button-title {
+  font-size: 1rem;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.category-button-meta {
+  font-size: 0.82rem;
+  font-weight: 700;
+  opacity: 0.9;
+}
+
 .category-selection button,
 .problem-actions button {
   background-color: #ffd700; /* Gold */

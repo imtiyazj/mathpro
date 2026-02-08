@@ -3,15 +3,12 @@ import {
   type BaseTenRepresentation,
   type MathProblem,
   type TwoWaysProblemData,
-  generateAdditionSubtractionProblem,
-  generateBaseTenBlocksProblem,
-  generateDragAndDropProblem,
-  generateNumberBondProblem,
 } from '../utils/problemGenerators';
+import type { LearningModule } from '../utils/modules';
 import { playFeedbackVoice } from '../utils/feedbackVoice';
 
 interface ProblemDisplayProps {
-  category: string;
+  module: LearningModule;
   onCorrectAnswer: () => void;
 }
 
@@ -26,22 +23,6 @@ interface TwoWaysState {
   first: PersonState;
   second: PersonState;
 }
-
-const buildProblemForCategory = (category: string): MathProblem => {
-  if (category === 'Addition and Subtraction') {
-    return generateAdditionSubtractionProblem();
-  }
-  if (category === 'Number Bonds') {
-    return generateNumberBondProblem();
-  }
-  if (category === 'Base Ten Blocks') {
-    return generateBaseTenBlocksProblem();
-  }
-  if (category === 'Drag and Drop') {
-    return generateDragAndDropProblem();
-  }
-  return { question: 'Coming Soon!', answer: 0 };
-};
 
 const parseEnteredCount = (value: string): number | null => {
   if (value.trim() === '') {
@@ -74,8 +55,8 @@ const getInitialTwoWaysState = (problem: MathProblem): TwoWaysState | null => {
   };
 };
 
-function ProblemDisplay({ category, onCorrectAnswer }: ProblemDisplayProps) {
-  const [currentProblem, setCurrentProblem] = useState<MathProblem>(() => buildProblemForCategory(category));
+function ProblemDisplay({ module, onCorrectAnswer }: ProblemDisplayProps) {
+  const [currentProblem, setCurrentProblem] = useState<MathProblem>(() => module.generator());
   const [userAnswer, setUserAnswer] = useState<string>('');
   const [feedback, setFeedback] = useState<string>('');
   const [answeredCorrectly, setAnsweredCorrectly] = useState(false);
@@ -90,7 +71,7 @@ function ProblemDisplay({ category, onCorrectAnswer }: ProblemDisplayProps) {
     );
 
   const generateNewProblem = () => {
-    const nextProblem = buildProblemForCategory(category);
+    const nextProblem = module.generator();
     setCurrentProblem(nextProblem);
     setUserAnswer('');
     setFeedback('');
@@ -158,7 +139,7 @@ function ProblemDisplay({ category, onCorrectAnswer }: ProblemDisplayProps) {
 
   return (
     <div className="problem-display">
-      <h2>{category} Problems</h2>
+      <h2>{module.title} Problems</h2>
       <>
         <p className="problem-question">{currentProblem.question}</p>
         {currentProblem.baseTen && (

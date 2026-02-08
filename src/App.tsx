@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import CategorySelection from './components/CategorySelection';
 import ProblemDisplay from './components/ProblemDisplay';
+import { LEARNING_MODULES, getModuleById } from './utils/modules';
 
 interface RewardsData {
   points: number;
@@ -33,7 +34,7 @@ const getSavedRewards = (): RewardsData => {
 };
 
 function App() {
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedModuleId, setSelectedModuleId] = useState<string | null>(null);
   const [rewards, setRewards] = useState<RewardsData>(() => getSavedRewards());
 
   useEffect(() => {
@@ -44,8 +45,8 @@ function App() {
     window.localStorage.setItem(REWARDS_STORAGE_KEY, JSON.stringify(rewards));
   }, [rewards]);
 
-  const handleSelectCategory = (category: string) => {
-    setSelectedCategory(category);
+  const handleSelectModule = (moduleId: string) => {
+    setSelectedModuleId(moduleId);
   };
 
   const handleCorrectAnswer = () => {
@@ -98,6 +99,8 @@ function App() {
     );
   };
 
+  const selectedModule = selectedModuleId ? getModuleById(selectedModuleId) ?? null : null;
+
   return (
     <div className="mathpro-container">
       <h1>MathPro</h1>
@@ -123,12 +126,12 @@ function App() {
       <button type="button" className="reward-reset-button" onClick={handleResetRewards}>
         Reset Rewards
       </button>
-      {!selectedCategory ? (
-        <CategorySelection onSelectCategory={handleSelectCategory} />
+      {!selectedModule ? (
+        <CategorySelection modules={LEARNING_MODULES} onSelectModule={handleSelectModule} />
       ) : (
         <>
-          <button className="back-button" onClick={() => setSelectedCategory(null)}>Back to Categories</button>
-          <ProblemDisplay category={selectedCategory} onCorrectAnswer={handleCorrectAnswer} />
+          <button className="back-button" onClick={() => setSelectedModuleId(null)}>Back to Categories</button>
+          <ProblemDisplay module={selectedModule} onCorrectAnswer={handleCorrectAnswer} />
         </>
       )}
     </div>

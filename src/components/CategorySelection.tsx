@@ -1,17 +1,19 @@
+import type { LearningModule } from '../utils/modules';
+
 interface CategorySelectionProps {
-  onSelectCategory: (category: string) => void;
+  modules: LearningModule[];
+  onSelectModule: (moduleId: string) => void;
 }
 
-function CategorySelection({ onSelectCategory }: CategorySelectionProps) {
-  const categories = ['Addition and Subtraction', 'Number Bonds', 'Base Ten Blocks', 'Drag and Drop'];
-
+function CategorySelection({ modules, onSelectModule }: CategorySelectionProps) {
   return (
     <div className="category-selection">
-      <h2>Select a Category</h2>
+      <h2>Select a Module</h2>
       <div className="category-buttons">
-        {categories.map((category) => (
-          <button key={category} onClick={() => onSelectCategory(category)}>
-            {category}
+        {modules.map((module) => (
+          <button key={module.id} onClick={() => onSelectModule(module.id)}>
+            <span className="category-button-title">{module.title}</span>
+            <span className="category-button-meta">{module.description}</span>
           </button>
         ))}
       </div>
