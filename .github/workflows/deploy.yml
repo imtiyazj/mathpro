@@ -23,7 +23,8 @@ jobs:
         with:
           node-version: 20
           cache: npm
-      - run: npm install --include=dev --no-audit --no-fund
+      - run: npm config set registry https://registry.npmjs.org/
+      - run: npm install --package-lock=false --include=dev --no-audit --no-fund
       - run: npm run build
       - uses: actions/upload-pages-artifact@v3
         with:
