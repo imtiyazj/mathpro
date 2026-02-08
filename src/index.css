@@ -218,7 +218,7 @@ h2 {
 }
 
 /* Back to Categories Button */
-.mathpro-container > button { /* Targeting the 'Back to Categories' button in App.tsx */
+.mathpro-container > .back-button { /* Targeting the 'Back to Categories' button in App.tsx */
   background-color: #4682b4; /* SteelBlue */
   color: white;
   border: none;
@@ -232,7 +232,7 @@ h2 {
   box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
-.mathpro-container > button:hover {
+.mathpro-container > .back-button:hover {
   background-color: #5f9ea0; /* CadetBlue */
   transform: translateY(-2px);
 }
@@ -346,6 +346,7 @@ h2 {
 
 .token-palette {
   display: flex;
+  flex-wrap: wrap;
   gap: 10px;
   justify-content: center;
   margin-bottom: 14px;
@@ -471,5 +472,67 @@ h2 {
 
   .count-inputs {
     grid-template-columns: 1fr 1fr;
+  }
+}
+
+.reward-reset-button {
+  border: none;
+  background: #dc143c;
+  color: #fff;
+  border-radius: 10px;
+  padding: 10px 16px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  margin: -4px 0 16px;
+}
+
+.reward-reset-button:hover {
+  background: #b51032;
+}
+
+@media (max-width: 900px) {
+  .mathpro-container {
+    max-width: 760px;
+    padding: 28px 22px;
+  }
+
+  .category-selection button,
+  .problem-actions button,
+  .reward-reset-button,
+  .mathpro-container > .back-button,
+  .token-palette button,
+  .clear-board-button {
+    min-height: 44px;
+  }
+
+  .problem-display .problem-question {
+    font-size: 2.1em;
+  }
+
+  .problem-display .problem-input {
+    max-width: 240px;
+    font-size: 1.7em;
+  }
+
+  .choice-button {
+    min-width: 108px;
+    min-height: 44px;
+  }
+
+  .rewards-panel {
+    gap: 10px;
+  }
+
+  .reward-card {
+    padding: 12px 10px;
+  }
+
+  .two-ways-person {
+    padding: 12px;
+  }
+
+  .count-inputs input {
+    min-height: 42px;
   }
 }

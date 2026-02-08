@@ -1,36 +1,85 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import CategorySelection from './components/CategorySelection';
 import ProblemDisplay from './components/ProblemDisplay';
 
+interface RewardsData {
+  points: number;
+  medals: number;
+  trophies: number;
+}
+
+const REWARDS_STORAGE_KEY = 'mathpro_rewards_v1';
+
+const getSavedRewards = (): RewardsData => {
+  if (typeof window === 'undefined') {
+    return { points: 0, medals: 0, trophies: 0 };
+  }
+
+  const raw = window.localStorage.getItem(REWARDS_STORAGE_KEY);
+  if (!raw) {
+    return { points: 0, medals: 0, trophies: 0 };
+  }
+
+  try {
+    const parsed = JSON.parse(raw) as Partial<RewardsData>;
+    return {
+      points: Number.isFinite(parsed.points) ? Math.max(0, Math.floor(parsed.points as number)) : 0,
+      medals: Number.isFinite(parsed.medals) ? Math.max(0, Math.floor(parsed.medals as number)) : 0,
+      trophies: Number.isFinite(parsed.trophies) ? Math.max(0, Math.floor(parsed.trophies as number)) : 0,
+    };
+  } catch {
+    return { points: 0, medals: 0, trophies: 0 };
+  }
+};
+
 function App() {
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [points, setPoints] = useState(0);
-  const [medals, setMedals] = useState(0);
-  const [trophies, setTrophies] = useState(0);
+  const [rewards, setRewards] = useState<RewardsData>(() => getSavedRewards());
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    window.localStorage.setItem(REWARDS_STORAGE_KEY, JSON.stringify(rewards));
+  }, [rewards]);
 
   const handleSelectCategory = (category: string) => {
     setSelectedCategory(category);
   };
 
   const handleCorrectAnswer = () => {
-    setPoints((currentPoints) => {
-      const nextPoints = currentPoints + 1;
-      if (nextPoints < 5) {
-        return nextPoints;
+    setRewards((current) => {
+      let points = current.points + 1;
+      let medals = current.medals;
+      let trophies = current.trophies;
+
+      if (points >= 5) {
+        points = 0;
+        medals += 1;
       }
 
-      setMedals((currentMedals) => {
-        const nextMedals = currentMedals + 1;
-        if (nextMedals < 5) {
-          return nextMedals;
-        }
+      if (medals >= 5) {
+        medals = 0;
+        trophies += 1;
+      }
 
-        setTrophies((currentTrophies) => currentTrophies + 1);
-        return 0;
-      });
-
-      return 0;
+      return { points, medals, trophies };
     });
+  };
+
+  const handleResetRewards = () => {
+    if (typeof window !== 'undefined') {
+      const confirmed = window.confirm('Reset all points, medals, and trophies?');
+      if (!confirmed) {
+        return;
+      }
+    }
+
+    setRewards({ points: 0, medals: 0, trophies: 0 });
+    if (typeof window !== 'undefined') {
+      window.localStorage.removeItem(REWARDS_STORAGE_KEY);
+    }
   };
 
   const renderTrack = (count: number, icon: string, label: string) => {
@@ -55,27 +104,30 @@ function App() {
       <div className="rewards-panel" aria-label="Rewards progress">
         <div className="reward-card">
           <span className="reward-label">Points</span>
-          {renderTrack(points, '⭐', 'points')}
-          <span className="reward-value">{points}/5</span>
+          {renderTrack(rewards.points, '⭐', 'points')}
+          <span className="reward-value">{rewards.points}/5</span>
         </div>
         <div className="reward-card">
           <span className="reward-label">Medals</span>
-          {renderTrack(medals, '🥇', 'medals')}
-          <span className="reward-value">{medals}/5</span>
+          {renderTrack(rewards.medals, '🥇', 'medals')}
+          <span className="reward-value">{rewards.medals}/5</span>
         </div>
         <div className="reward-card reward-card-trophy">
           <span className="reward-label">Trophies</span>
           <div className="trophy-display" aria-label="Trophy count">
             <span className="trophy-icon" aria-hidden="true">🏆</span>
-            <span className="trophy-count">x {trophies}</span>
+            <span className="trophy-count">x {rewards.trophies}</span>
           </div>
         </div>
       </div>
+      <button type="button" className="reward-reset-button" onClick={handleResetRewards}>
+        Reset Rewards
+      </button>
       {!selectedCategory ? (
         <CategorySelection onSelectCategory={handleSelectCategory} />
       ) : (
         <>
-          <button onClick={() => setSelectedCategory(null)}>Back to Categories</button>
+          <button className="back-button" onClick={() => setSelectedCategory(null)}>Back to Categories</button>
           <ProblemDisplay category={selectedCategory} onCorrectAnswer={handleCorrectAnswer} />
         </>
       )}
