@@ -33,21 +33,42 @@ function App() {
     });
   };
 
+  const renderTrack = (count: number, icon: string, label: string) => {
+    return (
+      <div className="reward-track" aria-label={`${label} progress`}>
+        {Array.from({ length: 5 }).map((_, index) => (
+          <span
+            key={`${label}-${index}`}
+            className={`reward-icon ${index < count ? 'active' : 'inactive'}`}
+            aria-hidden="true"
+          >
+            {icon}
+          </span>
+        ))}
+      </div>
+    );
+  };
+
   return (
     <div className="mathpro-container">
       <h1>MathPro</h1>
       <div className="rewards-panel" aria-label="Rewards progress">
         <div className="reward-card">
           <span className="reward-label">Points</span>
+          {renderTrack(points, '⭐', 'points')}
           <span className="reward-value">{points}/5</span>
         </div>
         <div className="reward-card">
           <span className="reward-label">Medals</span>
+          {renderTrack(medals, '🥇', 'medals')}
           <span className="reward-value">{medals}/5</span>
         </div>
         <div className="reward-card reward-card-trophy">
           <span className="reward-label">Trophies</span>
-          <span className="reward-value">{trophies}</span>
+          <div className="trophy-display" aria-label="Trophy count">
+            <span className="trophy-icon" aria-hidden="true">🏆</span>
+            <span className="trophy-count">x {trophies}</span>
+          </div>
         </div>
       </div>
       {!selectedCategory ? (
