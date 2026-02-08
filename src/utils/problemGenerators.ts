@@ -1,9 +1,17 @@
+export interface TwoWaysProblemData {
+  target: number;
+  firstName: string;
+  secondName: string;
+}
+
 export interface MathProblem {
   question: string;
   answer: number;
   format?: 'input' | 'multiple-choice';
   options?: number[];
   baseTen?: BaseTenRepresentation;
+  interactiveType?: 'two-ways';
+  twoWaysData?: TwoWaysProblemData;
 }
 
 export interface BaseTenRepresentation {
@@ -211,13 +219,17 @@ export const generateBaseTenBlocksProblem = (): MathProblem => {
   };
 
   const generateTypeSixProblem = (): MathProblem => {
-    const names = ['Ava', 'Noah', 'Mia', 'Leo', 'Liam', 'Emma'];
+    const names = ['Ava', 'Noah', 'Mia', 'Leo', 'Liam', 'Emma', 'Jane', 'Liz'];
     const items = ['beads', 'stickers', 'coins', 'blocks', 'marbles'];
     const name = randomChoice(names);
     const item = randomChoice(items);
     const tens = randomInt(1, 9);
     const ones = randomInt(0, 9);
     const total = tens * 10 + ones;
+
+    const firstName = randomChoice(names);
+    const secondName = randomChoice(names.filter((person) => person !== firstName));
+    const twoWayTarget = randomInt(22, 68);
 
     const templates: MathProblem[] = [
       {
@@ -254,6 +266,17 @@ export const generateBaseTenBlocksProblem = (): MathProblem => {
         question: `${name} made the number ${total} with base-ten blocks. How many ones did ${name} use?`,
         answer: ones,
         format: 'input',
+      },
+      {
+        question: `${firstName} and ${secondName} each use ${twoWayTarget} ${item} to make necklaces. Show two different ways they can each use ${twoWayTarget} ${item} with tens and ones. Drag sticks and dots, then write tens and ones for each.`,
+        answer: twoWayTarget,
+        format: 'input',
+        interactiveType: 'two-ways',
+        twoWaysData: {
+          target: twoWayTarget,
+          firstName,
+          secondName,
+        },
       },
     ];
 
