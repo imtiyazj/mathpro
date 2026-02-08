@@ -536,3 +536,20 @@ h2 {
     min-height: 42px;
   }
 }
+
+.count-inputs {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+}
+
+.count-inputs input {
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  font-size: 0.95rem;
+}
+
+.count-inputs .clear-board-button {
+  grid-column: 1 / -1;
+  width: 100%;
+}

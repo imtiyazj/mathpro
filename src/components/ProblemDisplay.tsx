@@ -15,14 +15,16 @@ interface ProblemDisplayProps {
   onCorrectAnswer: () => void;
 }
 
-interface PersonCounts {
-  tens: number;
-  ones: number;
+interface PersonState {
+  draggedTens: number;
+  draggedOnes: number;
+  enteredTens: string;
+  enteredOnes: string;
 }
 
 interface TwoWaysState {
-  first: PersonCounts;
-  second: PersonCounts;
+  first: PersonState;
+  second: PersonState;
 }
 
 const buildProblemForCategory = (category: string): MathProblem => {
@@ -41,11 +43,17 @@ const buildProblemForCategory = (category: string): MathProblem => {
   return { question: 'Coming Soon!', answer: 0 };
 };
 
-const clampToWhole = (value: number): number => {
-  if (Number.isNaN(value) || value < 0) {
-    return 0;
+const parseEnteredCount = (value: string): number | null => {
+  if (value.trim() === '') {
+    return null;
   }
-  return Math.floor(value);
+
+  const parsed = Number.parseInt(value, 10);
+  if (Number.isNaN(parsed) || parsed < 0) {
+    return null;
+  }
+
+  return Math.floor(parsed);
 };
 
 const getInitialTwoWaysState = (problem: MathProblem): TwoWaysState | null => {
@@ -53,9 +61,16 @@ const getInitialTwoWaysState = (problem: MathProblem): TwoWaysState | null => {
     return null;
   }
 
+  const emptyPerson: PersonState = {
+    draggedTens: 0,
+    draggedOnes: 0,
+    enteredTens: '',
+    enteredOnes: '',
+  };
+
   return {
-    first: { tens: 0, ones: 0 },
-    second: { tens: 0, ones: 0 },
+    first: { ...emptyPerson },
+    second: { ...emptyPerson },
   };
 };
 
@@ -92,10 +107,20 @@ function ProblemDisplay({ category, onCorrectAnswer }: ProblemDisplayProps) {
   const handleSubmitAnswer = (selectedOption?: number) => {
     if (currentProblem.interactiveType === 'two-ways' && currentProblem.twoWaysData && twoWaysState) {
       const target = currentProblem.twoWaysData.target;
-      const firstTotal = twoWaysState.first.tens * 10 + twoWaysState.first.ones;
-      const secondTotal = twoWaysState.second.tens * 10 + twoWaysState.second.ones;
-      const isDifferent = twoWaysState.first.tens !== twoWaysState.second.tens
-        || twoWaysState.first.ones !== twoWaysState.second.ones;
+
+      const firstTens = parseEnteredCount(twoWaysState.first.enteredTens);
+      const firstOnes = parseEnteredCount(twoWaysState.first.enteredOnes);
+      const secondTens = parseEnteredCount(twoWaysState.second.enteredTens);
+      const secondOnes = parseEnteredCount(twoWaysState.second.enteredOnes);
+
+      if (firstTens === null || firstOnes === null || secondTens === null || secondOnes === null) {
+        handleIncorrect('Enter tens and ones numbers for both people.');
+        return;
+      }
+
+      const firstTotal = firstTens * 10 + firstOnes;
+      const secondTotal = secondTens * 10 + secondOnes;
+      const isDifferent = firstTens !== secondTens || firstOnes !== secondOnes;
 
       if (firstTotal === target && secondTotal === target && isDifferent) {
         handleCorrect();
@@ -103,11 +128,11 @@ function ProblemDisplay({ category, onCorrectAnswer }: ProblemDisplayProps) {
       }
 
       if (!isDifferent) {
-        handleIncorrect('Both ways are the same. Make two different tens/ones combinations.');
+        handleIncorrect('Both ways are the same. Enter two different tens/ones combinations.');
         return;
       }
 
-      handleIncorrect(`Each person must make ${target}. Check the tens and ones totals.`);
+      handleIncorrect(`Each person must make ${target}. Check the entered tens and ones.`);
       return;
     }
 
@@ -178,7 +203,7 @@ interface TwoWaysBuilderProps {
 }
 
 function TwoWaysBuilder({ data, value, onChange }: TwoWaysBuilderProps) {
-  const updatePerson = (person: 'first' | 'second', patch: Partial<PersonCounts>) => {
+  const updatePerson = (person: 'first' | 'second', patch: Partial<PersonState>) => {
     onChange({
       ...value,
       [person]: {
@@ -190,11 +215,11 @@ function TwoWaysBuilder({ data, value, onChange }: TwoWaysBuilderProps) {
 
   const addToken = (person: 'first' | 'second', token: 'ten' | 'one') => {
     if (token === 'ten') {
-      updatePerson(person, { tens: value[person].tens + 1 });
+      updatePerson(person, { draggedTens: value[person].draggedTens + 1 });
       return;
     }
 
-    updatePerson(person, { ones: value[person].ones + 1 });
+    updatePerson(person, { draggedOnes: value[person].draggedOnes + 1 });
   };
 
   const handleDrop = (person: 'first' | 'second', token: 'ten' | 'one') => (event: DragEvent<HTMLDivElement>) => {
@@ -211,7 +236,9 @@ function TwoWaysBuilder({ data, value, onChange }: TwoWaysBuilderProps) {
   };
 
   const renderPersonBoard = (person: 'first' | 'second', name: string) => {
-    const totals = value[person].tens * 10 + value[person].ones;
+    const enteredTens = parseEnteredCount(value[person].enteredTens) ?? 0;
+    const enteredOnes = parseEnteredCount(value[person].enteredOnes) ?? 0;
+    const totals = enteredTens * 10 + enteredOnes;
 
     return (
       <div className="two-ways-person" key={person}>
@@ -224,7 +251,7 @@ function TwoWaysBuilder({ data, value, onChange }: TwoWaysBuilderProps) {
           >
             <span className="drop-label">Tens (sticks)</span>
             <div className="token-canvas">
-              {Array.from({ length: value[person].tens }).map((_, index) => (
+              {Array.from({ length: value[person].draggedTens }).map((_, index) => (
                 <span key={`stick-${person}-${index}`} className="stick-token">|</span>
               ))}
             </div>
@@ -236,7 +263,7 @@ function TwoWaysBuilder({ data, value, onChange }: TwoWaysBuilderProps) {
           >
             <span className="drop-label">Ones (dots)</span>
             <div className="token-canvas">
-              {Array.from({ length: value[person].ones }).map((_, index) => (
+              {Array.from({ length: value[person].draggedOnes }).map((_, index) => (
                 <span key={`dot-${person}-${index}`} className="dot-token">•</span>
               ))}
             </div>
@@ -249,8 +276,9 @@ function TwoWaysBuilder({ data, value, onChange }: TwoWaysBuilderProps) {
             <input
               type="number"
               min={0}
-              value={value[person].tens}
-              onChange={(event) => updatePerson(person, { tens: clampToWhole(parseInt(event.target.value, 10)) })}
+              value={value[person].enteredTens}
+              onChange={(event) => updatePerson(person, { enteredTens: event.target.value })}
+              placeholder="Type"
             />
           </label>
           <label>
@@ -258,20 +286,26 @@ function TwoWaysBuilder({ data, value, onChange }: TwoWaysBuilderProps) {
             <input
               type="number"
               min={0}
-              value={value[person].ones}
-              onChange={(event) => updatePerson(person, { ones: clampToWhole(parseInt(event.target.value, 10)) })}
+              value={value[person].enteredOnes}
+              onChange={(event) => updatePerson(person, { enteredOnes: event.target.value })}
+              placeholder="Type"
             />
           </label>
           <button
             type="button"
             className="clear-board-button"
-            onClick={() => updatePerson(person, { tens: 0, ones: 0 })}
+            onClick={() => updatePerson(person, {
+              draggedTens: 0,
+              draggedOnes: 0,
+              enteredTens: '',
+              enteredOnes: '',
+            })}
           >
             Clear
           </button>
         </div>
 
-        <p className="person-total">Total: {totals} / {data.target}</p>
+        <p className="person-total">Entered total: {totals} / {data.target}</p>
       </div>
     );
   };
