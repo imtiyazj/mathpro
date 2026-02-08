@@ -20,6 +20,10 @@ export interface BaseTenRepresentation {
   ones: number;
 }
 
+const STUDENT_NAMES = ['Ava', 'Noah', 'Mia', 'Leo', 'Liam', 'Emma', 'Jane', 'Liz', 'Owen', 'Ruby', 'Kai', 'Nora'];
+const COUNT_ITEMS = ['buttons', 'pencils', 'toy cars', 'shells', 'blocks', 'stickers', 'marbles', 'erasers', 'crayons', 'bookmarks'];
+const CONTAINERS = ['bags', 'boxes', 'jars', 'baskets', 'cups', 'bins'];
+
 const randomInt = (min: number, max: number): number => {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 };
@@ -90,9 +94,8 @@ const buildSmallMultipleChoiceOptions = (answer: number, max: number): number[] 
 };
 
 const buildTwoWaysProblemData = (): TwoWaysProblemData => {
-  const names = ['Ava', 'Noah', 'Mia', 'Leo', 'Liam', 'Emma', 'Jane', 'Liz'];
-  const firstName = randomChoice(names);
-  const secondName = randomChoice(names.filter((person) => person !== firstName));
+  const firstName = randomChoice(STUDENT_NAMES);
+  const secondName = randomChoice(STUDENT_NAMES.filter((person) => person !== firstName));
 
   return {
     target: randomInt(22, 68),
@@ -102,12 +105,19 @@ const buildTwoWaysProblemData = (): TwoWaysProblemData => {
 };
 
 export const generateDragAndDropProblem = (): MathProblem => {
-  const items = ['beads', 'stickers', 'coins', 'blocks', 'marbles'];
-  const item = randomChoice(items);
+  const item = randomChoice(COUNT_ITEMS);
+  const container = randomChoice(CONTAINERS);
   const twoWays = buildTwoWaysProblemData();
+  const scenario = randomChoice([
+    `${twoWays.firstName} and ${twoWays.secondName} each sort ${twoWays.target} ${item} into ${container}.`,
+    `${twoWays.firstName} and ${twoWays.secondName} each count ${twoWays.target} ${item} for class.`,
+    `${twoWays.firstName} and ${twoWays.secondName} each pack ${twoWays.target} ${item} for a game.`,
+    `${twoWays.firstName} and ${twoWays.secondName} each collect ${twoWays.target} ${item} on a scavenger hunt.`,
+    `${twoWays.firstName} and ${twoWays.secondName} each organize ${twoWays.target} ${item} in a math center.`,
+  ]);
 
   return {
-    question: `${twoWays.firstName} and ${twoWays.secondName} each use ${twoWays.target} ${item} to make necklaces. Show two different ways they can each use ${twoWays.target} ${item} with tens and ones. Drag sticks and dots, then write tens and ones for each.`,
+    question: `${scenario} Show two different tens-and-ones ways to make ${twoWays.target}. Drag sticks and dots, then write tens and ones for each person.`,
     answer: twoWays.target,
     format: 'input',
     interactiveType: 'two-ways',
@@ -116,9 +126,6 @@ export const generateDragAndDropProblem = (): MathProblem => {
 };
 
 export const generateAdditionSubtractionProblem = (): MathProblem => {
-  const names = ['Ava', 'Noah', 'Mia', 'Leo', 'Liam', 'Emma'];
-  const items = ['stickers', 'apples', 'blocks', 'coins', 'marbles'];
-
   const a = randomInt(1, 10);
   const b = randomInt(1, 10);
   const sum = a + b;
@@ -129,9 +136,10 @@ export const generateAdditionSubtractionProblem = (): MathProblem => {
 
   const bigger = randomInt(6, 20);
   const smaller = randomInt(1, bigger - 1);
-  const nameA = randomChoice(names);
-  const nameB = randomChoice(names.filter((name) => name !== nameA));
-  const item = randomChoice(items);
+  const nameA = randomChoice(STUDENT_NAMES);
+  const nameB = randomChoice(STUDENT_NAMES.filter((name) => name !== nameA));
+  const item = randomChoice(COUNT_ITEMS);
+  const container = randomChoice(CONTAINERS);
 
   const templates: MathProblem[] = [
     { question: `${a} + ${b} = ?`, answer: sum, format: 'input' },
@@ -142,6 +150,8 @@ export const generateAdditionSubtractionProblem = (): MathProblem => {
     { question: `${minuend} - ${subtrahend} = ?`, answer: difference, format: 'input' },
     { question: `${nameA} has ${a} ${item}. ${nameA} gets ${b} more. How many ${item} now?`, answer: sum, format: 'input' },
     { question: `${nameA} has ${minuend} ${item}. ${nameA} gives away ${subtrahend}. How many left?`, answer: difference, format: 'input' },
+    { question: `${nameA} puts ${a} ${item} in ${container}. Then ${nameA} adds ${b} more. How many ${item} are in the ${container}?`, answer: sum, format: 'input' },
+    { question: `There are ${minuend} ${item} in a ${container}. ${subtrahend} are taken out. How many ${item} are left?`, answer: difference, format: 'input' },
     {
       question: `${nameA} has ${bigger} ${item}. ${nameB} has ${smaller} ${item}. How many more does ${nameA} have?`,
       answer: bigger - smaller,
@@ -156,6 +166,8 @@ export const generateNumberBondProblem = (): MathProblem => {
   const total = randomInt(6, 20);
   const part1 = randomInt(0, total);
   const part2 = total - part1;
+  const name = randomChoice(STUDENT_NAMES);
+  const item = randomChoice(COUNT_ITEMS);
 
   const templates: MathProblem[] = [
     { question: `${part1} + ? = ${total}`, answer: part2, format: 'input' },
@@ -164,6 +176,8 @@ export const generateNumberBondProblem = (): MathProblem => {
     { question: `${total} = ? + ${part2}`, answer: part1, format: 'input' },
     { question: `${total} - ${part1} = ?`, answer: part2, format: 'input' },
     { question: `${total} - ? = ${part1}`, answer: part2, format: 'input' },
+    { question: `${name} has ${total} ${item}. ${part1} are red. How many are not red?`, answer: part2, format: 'input' },
+    { question: `A set has ${total} ${item}. ${part2} are on the table. How many are in the box?`, answer: part1, format: 'input' },
     {
       question: `Pick the missing part: ${part1} + ? = ${total}`,
       answer: part2,
@@ -241,17 +255,16 @@ export const generateBaseTenBlocksProblem = (): MathProblem => {
   };
 
   const generateTypeSixProblem = (): MathProblem => {
-    const names = ['Ava', 'Noah', 'Mia', 'Leo', 'Liam', 'Emma', 'Jane', 'Liz'];
-    const items = ['beads', 'stickers', 'coins', 'blocks', 'marbles'];
-    const name = randomChoice(names);
-    const item = randomChoice(items);
+    const name = randomChoice(STUDENT_NAMES);
+    const item = randomChoice(COUNT_ITEMS);
+    const container = randomChoice(CONTAINERS);
     const tens = randomInt(1, 9);
     const ones = randomInt(0, 9);
     const total = tens * 10 + ones;
 
     return randomChoice([
       {
-        question: `${name} has ${tens} tens and ${ones} ones ${item}. How many ${item} does ${name} have in all?`,
+        question: `${name} has ${tens} tens and ${ones} ones of ${item}. How many ${item} does ${name} have in all?`,
         answer: total,
         format: 'input',
       },
@@ -261,7 +274,7 @@ export const generateBaseTenBlocksProblem = (): MathProblem => {
         format: 'input',
       },
       {
-        question: `A box has ${tens} groups of 10 ${item} and ${ones} single ${item}. What number is shown?`,
+        question: `A ${container} has ${tens} groups of 10 ${item} and ${ones} single ${item}. What number is shown?`,
         answer: total,
         format: 'input',
       },
