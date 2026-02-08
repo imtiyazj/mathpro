@@ -10,6 +10,7 @@ import { playFeedbackVoice } from '../utils/feedbackVoice';
 
 interface ProblemDisplayProps {
   category: string;
+  onCorrectAnswer: () => void;
 }
 
 const buildProblemForCategory = (category: string): MathProblem => {
@@ -25,15 +26,17 @@ const buildProblemForCategory = (category: string): MathProblem => {
   return { question: 'Coming Soon!', answer: 0 };
 };
 
-function ProblemDisplay({ category }: ProblemDisplayProps) {
+function ProblemDisplay({ category, onCorrectAnswer }: ProblemDisplayProps) {
   const [currentProblem, setCurrentProblem] = useState<MathProblem>(() => buildProblemForCategory(category));
   const [userAnswer, setUserAnswer] = useState<string>('');
   const [feedback, setFeedback] = useState<string>('');
+  const [answeredCorrectly, setAnsweredCorrectly] = useState(false);
 
   const generateNewProblem = () => {
     setCurrentProblem(buildProblemForCategory(category));
     setUserAnswer('');
     setFeedback('');
+    setAnsweredCorrectly(false);
   };
 
   const handleSubmitAnswer = (selectedOption?: number) => {
@@ -45,6 +48,10 @@ function ProblemDisplay({ category }: ProblemDisplayProps) {
     if (answerToCheck === currentProblem.answer) {
       setFeedback('Correct!');
       playFeedbackVoice(true);
+      if (!answeredCorrectly) {
+        setAnsweredCorrectly(true);
+        onCorrectAnswer();
+      }
     } else {
       setFeedback(`Incorrect. The answer was ${currentProblem.answer}.`);
       playFeedbackVoice(false);

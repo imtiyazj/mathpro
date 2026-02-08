@@ -246,3 +246,44 @@ h2 {
     font-size: 2.2em;
   }
 }
+
+.rewards-panel {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin: 0 auto 22px;
+}
+
+.reward-card {
+  background: #f4fbff;
+  border: 2px solid #b9dbef;
+  border-radius: 12px;
+  padding: 10px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.reward-card-trophy {
+  background: #fff8e6;
+  border-color: #f2d38a;
+}
+
+.reward-label {
+  color: #2d5f7f;
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+}
+
+.reward-value {
+  color: #0e3f5d;
+  font-size: 1.2rem;
+  font-weight: 800;
+}
+
+@media (max-width: 600px) {
+  .rewards-panel {
+    grid-template-columns: 1fr;
+  }
+}
