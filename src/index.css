@@ -93,7 +93,7 @@ h2 {
 
 /* Problem Display */
 .problem-display .problem-question {
-  font-size: clamp(1.45rem, 4.6vw, 2.2rem);
+  font-size: clamp(1.2rem, 3.4vw, 1.75rem);
   margin: clamp(12px, 2vh, 20px) 0;
   line-height: 1.2;
   color: #32cd32; /* LimeGreen */
