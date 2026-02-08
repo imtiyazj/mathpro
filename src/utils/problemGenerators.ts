@@ -89,6 +89,32 @@ const buildSmallMultipleChoiceOptions = (answer: number, max: number): number[] 
   return shuffleNumbers([answer, ...selected]);
 };
 
+const buildTwoWaysProblemData = (): TwoWaysProblemData => {
+  const names = ['Ava', 'Noah', 'Mia', 'Leo', 'Liam', 'Emma', 'Jane', 'Liz'];
+  const firstName = randomChoice(names);
+  const secondName = randomChoice(names.filter((person) => person !== firstName));
+
+  return {
+    target: randomInt(22, 68),
+    firstName,
+    secondName,
+  };
+};
+
+export const generateDragAndDropProblem = (): MathProblem => {
+  const items = ['beads', 'stickers', 'coins', 'blocks', 'marbles'];
+  const item = randomChoice(items);
+  const twoWays = buildTwoWaysProblemData();
+
+  return {
+    question: `${twoWays.firstName} and ${twoWays.secondName} each use ${twoWays.target} ${item} to make necklaces. Show two different ways they can each use ${twoWays.target} ${item} with tens and ones. Drag sticks and dots, then write tens and ones for each.`,
+    answer: twoWays.target,
+    format: 'input',
+    interactiveType: 'two-ways',
+    twoWaysData: twoWays,
+  };
+};
+
 export const generateAdditionSubtractionProblem = (): MathProblem => {
   const names = ['Ava', 'Noah', 'Mia', 'Leo', 'Liam', 'Emma'];
   const items = ['stickers', 'apples', 'blocks', 'coins', 'marbles'];
@@ -164,14 +190,12 @@ export const generateBaseTenBlocksProblem = (): MathProblem => {
   const generateTypeOneProblem = (): MathProblem => {
     const { baseTen, value } = buildBaseTen();
 
-    const prompts = [
-      'Write the number shown by the quick picture.',
-      'What number is shown by the base-ten picture?',
-      'Count the blocks and write the number.',
-    ];
-
     return {
-      question: randomChoice(prompts),
+      question: randomChoice([
+        'Write the number shown by the quick picture.',
+        'What number is shown by the base-ten picture?',
+        'Count the blocks and write the number.',
+      ]),
       answer: value,
       format: 'input',
       baseTen,
@@ -197,7 +221,7 @@ export const generateBaseTenBlocksProblem = (): MathProblem => {
     const step = randomChoice([1, 2, 5, 10]);
     const start = randomInt(10, 99 - step * 4);
 
-    const sequenceTemplates: MathProblem[] = [
+    return randomChoice([
       {
         question: `Find the next number: ${start}, ${start + step}, ${start + step * 2}, __`,
         answer: start + step * 3,
@@ -213,9 +237,7 @@ export const generateBaseTenBlocksProblem = (): MathProblem => {
         answer: start + step * 4,
         format: 'input',
       },
-    ];
-
-    return randomChoice(sequenceTemplates);
+    ]);
   };
 
   const generateTypeSixProblem = (): MathProblem => {
@@ -227,11 +249,7 @@ export const generateBaseTenBlocksProblem = (): MathProblem => {
     const ones = randomInt(0, 9);
     const total = tens * 10 + ones;
 
-    const firstName = randomChoice(names);
-    const secondName = randomChoice(names.filter((person) => person !== firstName));
-    const twoWayTarget = randomInt(22, 68);
-
-    const templates: MathProblem[] = [
+    return randomChoice([
       {
         question: `${name} has ${tens} tens and ${ones} ones ${item}. How many ${item} does ${name} have in all?`,
         answer: total,
@@ -267,28 +285,13 @@ export const generateBaseTenBlocksProblem = (): MathProblem => {
         answer: ones,
         format: 'input',
       },
-      {
-        question: `${firstName} and ${secondName} each use ${twoWayTarget} ${item} to make necklaces. Show two different ways they can each use ${twoWayTarget} ${item} with tens and ones. Drag sticks and dots, then write tens and ones for each.`,
-        answer: twoWayTarget,
-        format: 'input',
-        interactiveType: 'two-ways',
-        twoWaysData: {
-          target: twoWayTarget,
-          firstName,
-          secondName,
-        },
-      },
-    ];
-
-    return randomChoice(templates);
+    ]);
   };
 
-  const generators = [
+  return randomChoice([
     generateTypeOneProblem,
     generateTypeTwoProblem,
     generateTypeFiveProblem,
     generateTypeSixProblem,
-  ];
-
-  return randomChoice(generators)();
+  ])();
 };

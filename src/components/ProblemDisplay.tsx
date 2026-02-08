@@ -5,6 +5,7 @@ import {
   type TwoWaysProblemData,
   generateAdditionSubtractionProblem,
   generateBaseTenBlocksProblem,
+  generateDragAndDropProblem,
   generateNumberBondProblem,
 } from '../utils/problemGenerators';
 import { playFeedbackVoice } from '../utils/feedbackVoice';
@@ -33,6 +34,9 @@ const buildProblemForCategory = (category: string): MathProblem => {
   }
   if (category === 'Base Ten Blocks') {
     return generateBaseTenBlocksProblem();
+  }
+  if (category === 'Drag and Drop') {
+    return generateDragAndDropProblem();
   }
   return { question: 'Coming Soon!', answer: 0 };
 };

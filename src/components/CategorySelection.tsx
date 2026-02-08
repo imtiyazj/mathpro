@@ -3,7 +3,7 @@ interface CategorySelectionProps {
 }
 
 function CategorySelection({ onSelectCategory }: CategorySelectionProps) {
-  const categories = ['Addition and Subtraction', 'Number Bonds', 'Base Ten Blocks'];
+  const categories = ['Addition and Subtraction', 'Number Bonds', 'Base Ten Blocks', 'Drag and Drop'];
 
   return (
     <div className="category-selection">
