@@ -80,6 +80,14 @@ function ProblemDisplay({ category, onCorrectAnswer }: ProblemDisplayProps) {
   const [feedback, setFeedback] = useState<string>('');
   const [answeredCorrectly, setAnsweredCorrectly] = useState(false);
   const [twoWaysState, setTwoWaysState] = useState<TwoWaysState | null>(() => getInitialTwoWaysState(currentProblem));
+  const isTwoWaysSubmitDisabled = currentProblem.interactiveType === 'two-ways'
+    && twoWaysState !== null
+    && (
+      parseEnteredCount(twoWaysState.first.enteredTens) === null
+      || parseEnteredCount(twoWaysState.first.enteredOnes) === null
+      || parseEnteredCount(twoWaysState.second.enteredTens) === null
+      || parseEnteredCount(twoWaysState.second.enteredOnes) === null
+    );
 
   const generateNewProblem = () => {
     const nextProblem = buildProblemForCategory(category);
@@ -106,7 +114,7 @@ function ProblemDisplay({ category, onCorrectAnswer }: ProblemDisplayProps) {
 
   const handleSubmitAnswer = (selectedOption?: number) => {
     if (currentProblem.interactiveType === 'two-ways' && currentProblem.twoWaysData && twoWaysState) {
-      const target = currentProblem.twoWaysData.target;
+      const { firstName, secondName, target } = currentProblem.twoWaysData;
 
       const firstTens = parseEnteredCount(twoWaysState.first.enteredTens);
       const firstOnes = parseEnteredCount(twoWaysState.first.enteredOnes);
@@ -114,7 +122,7 @@ function ProblemDisplay({ category, onCorrectAnswer }: ProblemDisplayProps) {
       const secondOnes = parseEnteredCount(twoWaysState.second.enteredOnes);
 
       if (firstTens === null || firstOnes === null || secondTens === null || secondOnes === null) {
-        handleIncorrect('Enter tens and ones numbers for both people.');
+        handleIncorrect(`Enter tens and ones numbers for ${firstName} and ${secondName}.`);
         return;
       }
 
@@ -132,7 +140,7 @@ function ProblemDisplay({ category, onCorrectAnswer }: ProblemDisplayProps) {
         return;
       }
 
-      handleIncorrect(`Each person must make ${target}. Check the entered tens and ones.`);
+      handleIncorrect(`${firstName} makes ${firstTotal} and ${secondName} makes ${secondTotal}. Both totals must be ${target}.`);
       return;
     }
 
@@ -186,7 +194,13 @@ function ProblemDisplay({ category, onCorrectAnswer }: ProblemDisplayProps) {
         )}
         <div className="problem-actions">
           {currentProblem.format !== 'multiple-choice' && (
-            <button onClick={() => handleSubmitAnswer()} className="submit-button">Submit Answer</button>
+            <button
+              onClick={() => handleSubmitAnswer()}
+              className="submit-button"
+              disabled={isTwoWaysSubmitDisabled}
+            >
+              Submit Answer
+            </button>
           )}
           <button onClick={generateNewProblem} className="new-problem-button">New Problem</button>
         </div>
@@ -239,6 +253,17 @@ function TwoWaysBuilder({ data, value, onChange }: TwoWaysBuilderProps) {
     const enteredTens = parseEnteredCount(value[person].enteredTens) ?? 0;
     const enteredOnes = parseEnteredCount(value[person].enteredOnes) ?? 0;
     const totals = enteredTens * 10 + enteredOnes;
+    const hasEnteredBoth = parseEnteredCount(value[person].enteredTens) !== null
+      && parseEnteredCount(value[person].enteredOnes) !== null;
+    const difference = data.target - totals;
+    const statusClass = !hasEnteredBoth ? 'is-pending' : difference === 0 ? 'is-correct' : 'is-off';
+    const statusText = !hasEnteredBoth
+      ? `Enter both numbers to make ${data.target}.`
+      : difference === 0
+        ? `Great job. ${name} makes ${data.target}.`
+        : difference > 0
+          ? `Need ${difference} more to reach ${data.target}.`
+          : `${Math.abs(difference)} too many.`;
 
     return (
       <div className="two-ways-person" key={person}>
@@ -269,6 +294,17 @@ function TwoWaysBuilder({ data, value, onChange }: TwoWaysBuilderProps) {
             </div>
           </div>
         </div>
+
+        <button
+          type="button"
+          className="use-dragged-button"
+          onClick={() => updatePerson(person, {
+            enteredTens: String(value[person].draggedTens),
+            enteredOnes: String(value[person].draggedOnes),
+          })}
+        >
+          Use Dragged Counts
+        </button>
 
         <div className="count-inputs">
           <label>
@@ -305,7 +341,8 @@ function TwoWaysBuilder({ data, value, onChange }: TwoWaysBuilderProps) {
           </button>
         </div>
 
-        <p className="person-total">Entered total: {totals} / {data.target}</p>
+        <p className={`person-total ${statusClass}`}>Entered total: {totals} / {data.target}</p>
+        <p className={`person-status ${statusClass}`}>{statusText}</p>
       </div>
     );
   };
@@ -320,6 +357,9 @@ function TwoWaysBuilder({ data, value, onChange }: TwoWaysBuilderProps) {
           Drag Dot (One)
         </button>
       </div>
+      <p className="two-ways-hint">
+        Build each model with dragged blocks, then enter tens and ones for each person.
+      </p>
       <div className="two-ways-grid">
         {renderPersonBoard('first', data.firstName)}
         {renderPersonBoard('second', data.secondName)}

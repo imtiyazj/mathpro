@@ -110,6 +110,19 @@ h2 {
   background-color: #228b22; /* ForestGreen */
 }
 
+.problem-actions .submit-button:disabled {
+  background-color: #8ebd8e;
+  color: #f7fff7;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.problem-actions .submit-button:disabled:hover {
+  background-color: #8ebd8e;
+  transform: none;
+}
+
 .problem-actions .new-problem-button {
   background-color: #8a2be2; /* BlueViolet */
   color: white;
@@ -362,6 +375,14 @@ h2 {
   cursor: grab;
 }
 
+.two-ways-hint {
+  margin: 0 0 12px;
+  text-align: center;
+  color: #355f7a;
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
 .two-ways-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -426,10 +447,10 @@ h2 {
 
 .count-inputs {
   display: grid;
-  grid-template-columns: 1fr 1fr auto;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 8px;
   margin-top: 10px;
-  align-items: end;
+  align-items: start;
 }
 
 .count-inputs label {
@@ -445,7 +466,10 @@ h2 {
   border: 2px solid #b8d5e9;
   border-radius: 8px;
   padding: 6px 8px;
-  font-size: 1rem;
+  font-size: 0.95rem;
+  width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .clear-board-button {
@@ -459,19 +483,53 @@ h2 {
   cursor: pointer;
 }
 
+.use-dragged-button {
+  border: none;
+  background: #dbeefe;
+  color: #1f4f73;
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 10px;
+  width: 100%;
+}
+
+.use-dragged-button:hover {
+  background: #c6e3fa;
+}
+
 .person-total {
-  margin: 8px 0 0;
+  margin: 8px 0 4px;
   color: #1f4f73;
   font-weight: 700;
+}
+
+.person-status {
+  margin: 0;
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+
+.person-total.is-correct,
+.person-status.is-correct {
+  color: #1c7b36;
+}
+
+.person-total.is-off,
+.person-status.is-off {
+  color: #a4472e;
+}
+
+.person-total.is-pending,
+.person-status.is-pending {
+  color: #49657a;
 }
 
 @media (max-width: 700px) {
   .two-ways-grid {
     grid-template-columns: 1fr;
-  }
-
-  .count-inputs {
-    grid-template-columns: 1fr 1fr;
   }
 }
 
@@ -535,18 +593,6 @@ h2 {
   .count-inputs input {
     min-height: 42px;
   }
-}
-
-.count-inputs {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  align-items: start;
-}
-
-.count-inputs input {
-  width: 100%;
-  min-width: 0;
-  box-sizing: border-box;
-  font-size: 0.95rem;
 }
 
 .count-inputs .clear-board-button {
