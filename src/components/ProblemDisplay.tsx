@@ -4,6 +4,7 @@ import {
   type MathProblem,
   type TimedDrillProblemData,
   type TwoWaysProblemData,
+  generateTimedNoCarryNoBorrowProblem,
 } from '../utils/problemGenerators';
 import type { AppSettings } from './SettingsPanel';
 import type { LearningModule } from '../utils/modules';
@@ -26,6 +27,13 @@ interface TwoWaysState {
   first: PersonState;
   second: PersonState;
 }
+
+const buildProblemForModule = (module: LearningModule, timedDrillLevel: number): MathProblem => {
+  if (module.id === 'timed-no-regrouping-drill') {
+    return generateTimedNoCarryNoBorrowProblem(timedDrillLevel);
+  }
+  return module.generator();
+};
 
 const parseEnteredCount = (value: string): number | null => {
   if (value.trim() === '') {
@@ -59,7 +67,9 @@ const getInitialTwoWaysState = (problem: MathProblem): TwoWaysState | null => {
 };
 
 function ProblemDisplay({ module, settings, onCorrectAnswer }: ProblemDisplayProps) {
-  const [currentProblem, setCurrentProblem] = useState<MathProblem>(() => module.generator());
+  const [timedDrillLevel, setTimedDrillLevel] = useState(1);
+  const [timedAllCorrect, setTimedAllCorrect] = useState(false);
+  const [currentProblem, setCurrentProblem] = useState<MathProblem>(() => buildProblemForModule(module, 1));
   const [userAnswer, setUserAnswer] = useState<string>('');
   const [feedback, setFeedback] = useState<string>('');
   const [answeredCorrectly, setAnsweredCorrectly] = useState(false);
@@ -84,7 +94,7 @@ function ProblemDisplay({ module, settings, onCorrectAnswer }: ProblemDisplayPro
     timedAnswersRef.current = timedAnswers;
   }, [timedAnswers]);
 
-  const finalizeTimedDrill = useCallback(() => {
+  const finalizeTimedDrill = useCallback((reason: 'submit' | 'timeout') => {
     if (!isTimedDrill || timedScored || !currentProblem.timedDrillData) {
       return;
     }
@@ -94,15 +104,26 @@ function ProblemDisplay({ module, settings, onCorrectAnswer }: ProblemDisplayPro
       const entered = Number.parseInt((timedAnswersRef.current[item.id] ?? '').trim(), 10);
       return entered === item.answer ? count + 1 : count;
     }, 0);
+    const incorrect = total - correct;
+    const allCorrect = correct === total;
 
-    setFeedback(`Time up! You got ${correct} out of ${total} correct.`);
+    if (reason === 'timeout') {
+      setFeedback(`Time up! Correct: ${correct}, Incorrect: ${incorrect}.`);
+    } else if (allCorrect) {
+      setFeedback(`Perfect score! Correct: ${correct}, Incorrect: ${incorrect}. +5 points!`);
+    } else {
+      setFeedback(`Submitted. Correct: ${correct}, Incorrect: ${incorrect}.`);
+    }
     if (settings.voiceFeedbackEnabled) {
-      playFeedbackVoice(correct > 0);
+      playFeedbackVoice(allCorrect);
     }
-    if (!answeredCorrectly && correct > 0) {
+    if (!answeredCorrectly && allCorrect) {
       setAnsweredCorrectly(true);
-      onCorrectAnswer(correct);
+      onCorrectAnswer(5);
     }
+    setTimedAllCorrect(allCorrect);
+    setTimedRunning(false);
+    setTimedDone(true);
     setTimedScored(true);
   }, [answeredCorrectly, currentProblem.timedDrillData, isTimedDrill, onCorrectAnswer, settings.voiceFeedbackEnabled, timedScored]);
 
@@ -115,9 +136,7 @@ function ProblemDisplay({ module, settings, onCorrectAnswer }: ProblemDisplayPro
       setTimeLeftSec((current) => {
         if (current <= 1) {
           window.clearInterval(timer);
-          setTimedRunning(false);
-          setTimedDone(true);
-          finalizeTimedDrill();
+          finalizeTimedDrill('timeout');
           return 0;
         }
         return current - 1;
@@ -128,7 +147,12 @@ function ProblemDisplay({ module, settings, onCorrectAnswer }: ProblemDisplayPro
   }, [finalizeTimedDrill, isTimedDrill, timedRunning, timedDone]);
 
   const generateNewProblem = () => {
-    const nextProblem = module.generator();
+    const nextTimedDrillLevel = module.id === 'timed-no-regrouping-drill' && timedAllCorrect
+      ? Math.min(4, timedDrillLevel + 1)
+      : timedDrillLevel;
+    const nextProblem = buildProblemForModule(module, nextTimedDrillLevel);
+    setTimedDrillLevel(nextTimedDrillLevel);
+    setTimedAllCorrect(false);
     setCurrentProblem(nextProblem);
     setUserAnswer('');
     setFeedback('');
@@ -219,6 +243,10 @@ function ProblemDisplay({ module, settings, onCorrectAnswer }: ProblemDisplayPro
     setTimedAnswers((current) => ({ ...current, [id]: value }));
   };
 
+  const handleSubmitTimedDrill = () => {
+    finalizeTimedDrill('submit');
+  };
+
   return (
     <div className="problem-display">
       <h2>{module.title} Problems</h2>
@@ -232,6 +260,7 @@ function ProblemDisplay({ module, settings, onCorrectAnswer }: ProblemDisplayPro
             timedDone={timedDone}
             answers={timedAnswers}
             onStart={handleStartTimedDrill}
+            onSubmit={handleSubmitTimedDrill}
             onChangeAnswer={handleTimedAnswerChange}
           />
         )}
@@ -291,6 +320,7 @@ interface TimedDrillBoardProps {
   timedDone: boolean;
   answers: Record<string, string>;
   onStart: () => void;
+  onSubmit: () => void;
   onChangeAnswer: (id: string, value: string) => void;
 }
 
@@ -301,27 +331,34 @@ function TimedDrillBoard({
   timedDone,
   answers,
   onStart,
+  onSubmit,
   onChangeAnswer,
 }: TimedDrillBoardProps) {
   return (
     <div className="timed-drill-board" aria-label="Timed arithmetic drill">
       <div className="timed-drill-header">
-        <div>
-          <p className="timed-drill-title">{data.title}</p>
-          <p className="timed-drill-instructions">{data.instructions}</p>
-        </div>
         <div className={`timed-drill-timer ${timedDone ? 'is-done' : ''}`}>
           {timeLeftSec}s
         </div>
       </div>
-      <button
-        type="button"
-        className="timed-drill-start"
-        onClick={onStart}
-        disabled={timedRunning}
-      >
-        {timedRunning ? 'Running...' : 'Start / Restart Drill'}
-      </button>
+      <div className="timed-drill-actions">
+        <button
+          type="button"
+          className="timed-drill-start"
+          onClick={onStart}
+          disabled={timedRunning}
+        >
+          {timedRunning ? 'Running...' : 'Start / Restart Drill'}
+        </button>
+        <button
+          type="button"
+          className="timed-drill-submit"
+          onClick={onSubmit}
+          disabled={!timedRunning || timedDone}
+        >
+          Submit Drill
+        </button>
+      </div>
       <div className="timed-drill-grid">
         {data.items.map((item) => (
           <label key={item.id} className="timed-drill-item">

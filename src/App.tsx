@@ -187,7 +187,7 @@ function App() {
       ) : (
         <>
           <button className="back-button" onClick={() => setSelectedModuleId(null)}>Back to Categories</button>
-          <ProblemDisplay module={selectedModule} settings={settings} onCorrectAnswer={handleCorrectAnswer} />
+          <ProblemDisplay key={selectedModule.id} module={selectedModule} settings={settings} onCorrectAnswer={handleCorrectAnswer} />
         </>
       )}
       {isSettingsOpen && (

@@ -28,8 +28,6 @@ export interface TimedDrillItem {
 }
 
 export interface TimedDrillProblemData {
-  title: string;
-  instructions: string;
   items: TimedDrillItem[];
 }
 
@@ -372,27 +370,29 @@ const generateTwoDigitNoBorrowSubtraction = (): TimedDrillItem => {
   };
 };
 
-export const generateTimedNoCarryNoBorrowProblem = (): MathProblem => {
-  const builders = [
-    generateOneDigitNoCarryAddition,
-    generateTwoDigitNoCarryAddition,
-    generateOneDigitNoBorrowSubtraction,
-    generateTwoDigitNoBorrowSubtraction,
-  ];
+export const generateTimedNoCarryNoBorrowProblem = (level = 1): MathProblem => {
+  const normalizedLevel = Math.max(1, Math.min(4, Math.floor(level)));
+  const buildersByLevel: Array<() => TimedDrillItem> = normalizedLevel === 1
+    ? [generateOneDigitNoCarryAddition, generateOneDigitNoBorrowSubtraction]
+    : normalizedLevel === 2
+      ? [generateOneDigitNoCarryAddition, generateOneDigitNoBorrowSubtraction, generateTwoDigitNoCarryAddition]
+      : normalizedLevel === 3
+        ? [generateOneDigitNoCarryAddition, generateOneDigitNoBorrowSubtraction, generateTwoDigitNoCarryAddition, generateTwoDigitNoBorrowSubtraction]
+        : [generateTwoDigitNoCarryAddition, generateTwoDigitNoBorrowSubtraction, generateTwoDigitNoCarryAddition, generateOneDigitNoBorrowSubtraction];
 
   const items = Array.from({ length: 18 }).map((_, index) => {
-    const builder = builders[index % builders.length];
+    const builder = buildersByLevel[index % buildersByLevel.length];
     return builder();
   });
 
   return {
-    question: 'Solve as many as you can before time runs out.',
+    question: normalizedLevel === 1
+      ? 'Solve the single-digit addition and subtraction drill.'
+      : `Solve the drill. Level ${normalizedLevel} adds harder problems.`,
     answer: 0,
     format: 'input',
     interactiveType: 'timed-drill',
     timedDrillData: {
-      title: '1-Minute No Carry / No Borrow Drill',
-      instructions: 'Includes 1-digit and 2-digit addition/subtraction only. No regrouping needed.',
       items,
     },
   };

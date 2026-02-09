@@ -701,21 +701,9 @@ h2 {
 
 .timed-drill-header {
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
+  justify-content: flex-end;
+  align-items: center;
   gap: 10px;
-}
-
-.timed-drill-title {
-  margin: 0;
-  color: #1f4f73;
-  font-weight: 800;
-}
-
-.timed-drill-instructions {
-  margin: 4px 0 0;
-  color: #4b6f86;
-  font-size: 0.9rem;
 }
 
 .timed-drill-timer {
@@ -748,6 +736,28 @@ h2 {
 
 .timed-drill-start:disabled {
   background: #93bfa2;
+  cursor: not-allowed;
+}
+
+.timed-drill-actions {
+  margin-top: 10px;
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.timed-drill-submit {
+  border: none;
+  background: #1f6fa3;
+  color: #fff;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.timed-drill-submit:disabled {
+  background: #8fb7d3;
   cursor: not-allowed;
 }
 
@@ -794,6 +804,7 @@ h2 {
   .token-palette button,
   .clear-board-button,
   .timed-drill-start,
+  .timed-drill-submit,
   .settings-close-button {
     min-height: 44px;
   }
