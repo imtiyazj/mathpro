@@ -4,6 +4,7 @@ import {
   generateBaseTenBlocksProblem,
   generateDragAndDropProblem,
   generateNumberBondProblem,
+  generateTimedNoCarryNoBorrowProblem,
 } from './problemGenerators';
 
 export interface LearningModule {
@@ -39,6 +40,12 @@ export const LEARNING_MODULES: LearningModule[] = [
     description: 'Build two different tens/ones models.',
     generator: generateDragAndDropProblem,
     pointsPerSolve: 2,
+  },
+  {
+    id: 'timed-no-regrouping-drill',
+    title: 'Timed Add/Sub Drill',
+    description: '1-digit and 2-digit, no carry or borrowing.',
+    generator: generateTimedNoCarryNoBorrowProblem,
   },
 ];
 

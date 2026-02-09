@@ -1,14 +1,17 @@
-import { useState, type DragEvent } from 'react';
+import { useCallback, useEffect, useRef, useState, type DragEvent } from 'react';
 import {
   type BaseTenRepresentation,
   type MathProblem,
+  type TimedDrillProblemData,
   type TwoWaysProblemData,
 } from '../utils/problemGenerators';
+import type { AppSettings } from './SettingsPanel';
 import type { LearningModule } from '../utils/modules';
 import { playFeedbackVoice } from '../utils/feedbackVoice';
 
 interface ProblemDisplayProps {
   module: LearningModule;
+  settings: AppSettings;
   onCorrectAnswer: (pointsEarned: number) => void;
 }
 
@@ -55,12 +58,18 @@ const getInitialTwoWaysState = (problem: MathProblem): TwoWaysState | null => {
   };
 };
 
-function ProblemDisplay({ module, onCorrectAnswer }: ProblemDisplayProps) {
+function ProblemDisplay({ module, settings, onCorrectAnswer }: ProblemDisplayProps) {
   const [currentProblem, setCurrentProblem] = useState<MathProblem>(() => module.generator());
   const [userAnswer, setUserAnswer] = useState<string>('');
   const [feedback, setFeedback] = useState<string>('');
   const [answeredCorrectly, setAnsweredCorrectly] = useState(false);
   const [twoWaysState, setTwoWaysState] = useState<TwoWaysState | null>(() => getInitialTwoWaysState(currentProblem));
+  const [timedAnswers, setTimedAnswers] = useState<Record<string, string>>({});
+  const [timedRunning, setTimedRunning] = useState(false);
+  const [timedDone, setTimedDone] = useState(false);
+  const [timedScored, setTimedScored] = useState(false);
+  const [timeLeftSec, setTimeLeftSec] = useState(settings.timedDrillDurationSec);
+  const timedAnswersRef = useRef<Record<string, string>>({});
   const isTwoWaysSubmitDisabled = currentProblem.interactiveType === 'two-ways'
     && twoWaysState !== null
     && (
@@ -69,6 +78,54 @@ function ProblemDisplay({ module, onCorrectAnswer }: ProblemDisplayProps) {
       || parseEnteredCount(twoWaysState.second.enteredTens) === null
       || parseEnteredCount(twoWaysState.second.enteredOnes) === null
     );
+  const isTimedDrill = currentProblem.interactiveType === 'timed-drill' && !!currentProblem.timedDrillData;
+
+  useEffect(() => {
+    timedAnswersRef.current = timedAnswers;
+  }, [timedAnswers]);
+
+  const finalizeTimedDrill = useCallback(() => {
+    if (!isTimedDrill || timedScored || !currentProblem.timedDrillData) {
+      return;
+    }
+
+    const total = currentProblem.timedDrillData.items.length;
+    const correct = currentProblem.timedDrillData.items.reduce((count, item) => {
+      const entered = Number.parseInt((timedAnswersRef.current[item.id] ?? '').trim(), 10);
+      return entered === item.answer ? count + 1 : count;
+    }, 0);
+
+    setFeedback(`Time up! You got ${correct} out of ${total} correct.`);
+    if (settings.voiceFeedbackEnabled) {
+      playFeedbackVoice(correct > 0);
+    }
+    if (!answeredCorrectly && correct > 0) {
+      setAnsweredCorrectly(true);
+      onCorrectAnswer(correct);
+    }
+    setTimedScored(true);
+  }, [answeredCorrectly, currentProblem.timedDrillData, isTimedDrill, onCorrectAnswer, settings.voiceFeedbackEnabled, timedScored]);
+
+  useEffect(() => {
+    if (!isTimedDrill || !timedRunning || timedDone) {
+      return;
+    }
+
+    const timer = window.setInterval(() => {
+      setTimeLeftSec((current) => {
+        if (current <= 1) {
+          window.clearInterval(timer);
+          setTimedRunning(false);
+          setTimedDone(true);
+          finalizeTimedDrill();
+          return 0;
+        }
+        return current - 1;
+      });
+    }, 1000);
+
+    return () => window.clearInterval(timer);
+  }, [finalizeTimedDrill, isTimedDrill, timedRunning, timedDone]);
 
   const generateNewProblem = () => {
     const nextProblem = module.generator();
@@ -77,20 +134,29 @@ function ProblemDisplay({ module, onCorrectAnswer }: ProblemDisplayProps) {
     setFeedback('');
     setAnsweredCorrectly(false);
     setTwoWaysState(getInitialTwoWaysState(nextProblem));
+    setTimedAnswers({});
+    setTimedRunning(false);
+    setTimedDone(false);
+    setTimedScored(false);
+    setTimeLeftSec(settings.timedDrillDurationSec);
   };
 
-  const handleCorrect = () => {
+  const handleCorrect = (pointsEarned?: number) => {
     setFeedback('Correct!');
-    playFeedbackVoice(true);
+    if (settings.voiceFeedbackEnabled) {
+      playFeedbackVoice(true);
+    }
     if (!answeredCorrectly) {
       setAnsweredCorrectly(true);
-      onCorrectAnswer(module.pointsPerSolve ?? 1);
+      onCorrectAnswer(pointsEarned ?? module.pointsPerSolve ?? 1);
     }
   };
 
   const handleIncorrect = (message: string) => {
     setFeedback(message);
-    playFeedbackVoice(false);
+    if (settings.voiceFeedbackEnabled) {
+      playFeedbackVoice(false);
+    }
   };
 
   const handleSubmitAnswer = (selectedOption?: number) => {
@@ -112,7 +178,10 @@ function ProblemDisplay({ module, onCorrectAnswer }: ProblemDisplayProps) {
       const isDifferent = firstTens !== secondTens || firstOnes !== secondOnes;
 
       if (firstTotal === target && secondTotal === target && isDifferent) {
-        handleCorrect();
+        const dragDropPoints = module.id === 'two-ways-tens-ones'
+          ? settings.dragDropPoints
+          : module.pointsPerSolve ?? 1;
+        handleCorrect(dragDropPoints);
         return;
       }
 
@@ -137,11 +206,35 @@ function ProblemDisplay({ module, onCorrectAnswer }: ProblemDisplayProps) {
     }
   };
 
+  const handleStartTimedDrill = () => {
+    setTimedAnswers({});
+    setTimeLeftSec(settings.timedDrillDurationSec);
+    setTimedDone(false);
+    setTimedScored(false);
+    setTimedRunning(true);
+    setFeedback('');
+  };
+
+  const handleTimedAnswerChange = (id: string, value: string) => {
+    setTimedAnswers((current) => ({ ...current, [id]: value }));
+  };
+
   return (
     <div className="problem-display">
       <h2>{module.title} Problems</h2>
       <>
         <p className="problem-question">{currentProblem.question}</p>
+        {isTimedDrill && currentProblem.timedDrillData && (
+          <TimedDrillBoard
+            data={currentProblem.timedDrillData}
+            timeLeftSec={timeLeftSec}
+            timedRunning={timedRunning}
+            timedDone={timedDone}
+            answers={timedAnswers}
+            onStart={handleStartTimedDrill}
+            onChangeAnswer={handleTimedAnswerChange}
+          />
+        )}
         {currentProblem.baseTen && (
           <BaseTenBlocks representation={currentProblem.baseTen} />
         )}
@@ -151,7 +244,7 @@ function ProblemDisplay({ module, onCorrectAnswer }: ProblemDisplayProps) {
             value={twoWaysState}
             onChange={setTwoWaysState}
           />
-        ) : currentProblem.format === 'multiple-choice' && currentProblem.options ? (
+        ) : isTimedDrill ? null : currentProblem.format === 'multiple-choice' && currentProblem.options ? (
           <div className="choice-options">
             {currentProblem.options.map((option) => (
               <button
@@ -174,7 +267,7 @@ function ProblemDisplay({ module, onCorrectAnswer }: ProblemDisplayProps) {
           />
         )}
         <div className="problem-actions">
-          {currentProblem.format !== 'multiple-choice' && (
+          {currentProblem.format !== 'multiple-choice' && !isTimedDrill && (
             <button
               onClick={() => handleSubmitAnswer()}
               className="submit-button"
@@ -187,6 +280,62 @@ function ProblemDisplay({ module, onCorrectAnswer }: ProblemDisplayProps) {
         </div>
         {feedback && <p className={`feedback ${feedback === 'Correct!' ? 'correct' : 'incorrect'}`}>{feedback}</p>}
       </>
+    </div>
+  );
+}
+
+interface TimedDrillBoardProps {
+  data: TimedDrillProblemData;
+  timeLeftSec: number;
+  timedRunning: boolean;
+  timedDone: boolean;
+  answers: Record<string, string>;
+  onStart: () => void;
+  onChangeAnswer: (id: string, value: string) => void;
+}
+
+function TimedDrillBoard({
+  data,
+  timeLeftSec,
+  timedRunning,
+  timedDone,
+  answers,
+  onStart,
+  onChangeAnswer,
+}: TimedDrillBoardProps) {
+  return (
+    <div className="timed-drill-board" aria-label="Timed arithmetic drill">
+      <div className="timed-drill-header">
+        <div>
+          <p className="timed-drill-title">{data.title}</p>
+          <p className="timed-drill-instructions">{data.instructions}</p>
+        </div>
+        <div className={`timed-drill-timer ${timedDone ? 'is-done' : ''}`}>
+          {timeLeftSec}s
+        </div>
+      </div>
+      <button
+        type="button"
+        className="timed-drill-start"
+        onClick={onStart}
+        disabled={timedRunning}
+      >
+        {timedRunning ? 'Running...' : 'Start / Restart Drill'}
+      </button>
+      <div className="timed-drill-grid">
+        {data.items.map((item) => (
+          <label key={item.id} className="timed-drill-item">
+            <span>{item.prompt}</span>
+            <input
+              type="number"
+              value={answers[item.id] ?? ''}
+              onChange={(event) => onChangeAnswer(item.id, event.target.value)}
+              disabled={!timedRunning || timedDone}
+              inputMode="numeric"
+            />
+          </label>
+        ))}
+      </div>
     </div>
   );
 }

@@ -10,14 +10,27 @@ export interface MathProblem {
   format?: 'input' | 'multiple-choice';
   options?: number[];
   baseTen?: BaseTenRepresentation;
-  interactiveType?: 'two-ways';
+  interactiveType?: 'two-ways' | 'timed-drill';
   twoWaysData?: TwoWaysProblemData;
+  timedDrillData?: TimedDrillProblemData;
 }
 
 export interface BaseTenRepresentation {
   hundreds: number;
   tens: number;
   ones: number;
+}
+
+export interface TimedDrillItem {
+  id: string;
+  prompt: string;
+  answer: number;
+}
+
+export interface TimedDrillProblemData {
+  title: string;
+  instructions: string;
+  items: TimedDrillItem[];
 }
 
 const STUDENT_NAMES = ['Ava', 'Noah', 'Mia', 'Leo', 'Liam', 'Emma', 'Jane', 'Liz', 'Owen', 'Ruby', 'Kai', 'Nora'];
@@ -307,4 +320,80 @@ export const generateBaseTenBlocksProblem = (): MathProblem => {
     generateTypeFiveProblem,
     generateTypeSixProblem,
   ])();
+};
+
+const generateOneDigitNoCarryAddition = (): TimedDrillItem => {
+  const a = randomInt(0, 9);
+  const b = randomInt(0, 9 - a);
+  return {
+    id: `one-add-${a}-${b}-${Math.random().toString(36).slice(2, 7)}`,
+    prompt: `${a} + ${b} =`,
+    answer: a + b,
+  };
+};
+
+const generateTwoDigitNoCarryAddition = (): TimedDrillItem => {
+  const onesA = randomInt(0, 9);
+  const onesB = randomInt(0, 9 - onesA);
+  const tensA = randomInt(1, 9);
+  const tensB = randomInt(0, 9 - tensA);
+  const a = tensA * 10 + onesA;
+  const b = tensB * 10 + onesB;
+
+  return {
+    id: `two-add-${a}-${b}-${Math.random().toString(36).slice(2, 7)}`,
+    prompt: `${a} + ${b} =`,
+    answer: a + b,
+  };
+};
+
+const generateOneDigitNoBorrowSubtraction = (): TimedDrillItem => {
+  const a = randomInt(0, 9);
+  const b = randomInt(0, a);
+  return {
+    id: `one-sub-${a}-${b}-${Math.random().toString(36).slice(2, 7)}`,
+    prompt: `${a} - ${b} =`,
+    answer: a - b,
+  };
+};
+
+const generateTwoDigitNoBorrowSubtraction = (): TimedDrillItem => {
+  const tensA = randomInt(1, 9);
+  const onesA = randomInt(0, 9);
+  const tensB = randomInt(0, tensA);
+  const onesB = randomInt(0, onesA);
+  const a = tensA * 10 + onesA;
+  const b = tensB * 10 + onesB;
+
+  return {
+    id: `two-sub-${a}-${b}-${Math.random().toString(36).slice(2, 7)}`,
+    prompt: `${a} - ${b} =`,
+    answer: a - b,
+  };
+};
+
+export const generateTimedNoCarryNoBorrowProblem = (): MathProblem => {
+  const builders = [
+    generateOneDigitNoCarryAddition,
+    generateTwoDigitNoCarryAddition,
+    generateOneDigitNoBorrowSubtraction,
+    generateTwoDigitNoBorrowSubtraction,
+  ];
+
+  const items = Array.from({ length: 18 }).map((_, index) => {
+    const builder = builders[index % builders.length];
+    return builder();
+  });
+
+  return {
+    question: 'Solve as many as you can before time runs out.',
+    answer: 0,
+    format: 'input',
+    interactiveType: 'timed-drill',
+    timedDrillData: {
+      title: '1-Minute No Carry / No Borrow Drill',
+      instructions: 'Includes 1-digit and 2-digit addition/subtraction only. No regrouping needed.',
+      items,
+    },
+  };
 };

@@ -615,6 +615,171 @@ h2 {
   background: #b51032;
 }
 
+.settings-open-button {
+  border: none;
+  background: #296b8f;
+  color: #fff;
+  border-radius: 10px;
+  padding: 10px 16px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  margin: 0 0 16px;
+}
+
+.settings-open-button:hover {
+  background: #1f5673;
+}
+
+.settings-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(18, 39, 55, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  z-index: 50;
+}
+
+.settings-panel {
+  width: min(560px, 100%);
+  background: #fff;
+  border-radius: 14px;
+  border: 2px solid #b9d7eb;
+  padding: 18px;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.2);
+}
+
+.settings-grid {
+  display: grid;
+  gap: 10px;
+}
+
+.settings-grid label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: left;
+  color: #2d5f7f;
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+.settings-grid input[type='number'] {
+  border: 2px solid #bdd9ec;
+  border-radius: 8px;
+  padding: 8px;
+  font-size: 1rem;
+}
+
+.settings-checkbox {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+
+.settings-close-button {
+  margin-top: 14px;
+  border: none;
+  background: #2f9158;
+  color: #fff;
+  border-radius: 8px;
+  padding: 9px 14px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.timed-drill-board {
+  background: #f7fbff;
+  border: 2px solid #cfe4f3;
+  border-radius: 12px;
+  padding: 12px;
+  margin: 12px 0;
+}
+
+.timed-drill-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.timed-drill-title {
+  margin: 0;
+  color: #1f4f73;
+  font-weight: 800;
+}
+
+.timed-drill-instructions {
+  margin: 4px 0 0;
+  color: #4b6f86;
+  font-size: 0.9rem;
+}
+
+.timed-drill-timer {
+  min-width: 64px;
+  text-align: center;
+  background: #e9f6ff;
+  border: 2px solid #9fc9e8;
+  border-radius: 8px;
+  font-weight: 800;
+  color: #225d82;
+  padding: 6px 8px;
+}
+
+.timed-drill-timer.is-done {
+  background: #ffeaea;
+  border-color: #e49f9f;
+  color: #9a3f3f;
+}
+
+.timed-drill-start {
+  margin-top: 10px;
+  border: none;
+  background: #2f9158;
+  color: #fff;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.timed-drill-start:disabled {
+  background: #93bfa2;
+  cursor: not-allowed;
+}
+
+.timed-drill-grid {
+  margin-top: 12px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.timed-drill-item {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 8px;
+  background: #fff;
+  border: 1px solid #d5e7f3;
+  border-radius: 8px;
+  padding: 8px;
+  color: #21506f;
+  font-weight: 700;
+}
+
+.timed-drill-item input {
+  width: 68px;
+  border: 2px solid #b8d5e9;
+  border-radius: 8px;
+  padding: 6px;
+  font-size: 1rem;
+  text-align: center;
+}
+
 @media (max-width: 900px) {
   .mathpro-container {
     max-width: 760px;
@@ -624,9 +789,12 @@ h2 {
   .category-selection button,
   .problem-actions button,
   .reward-reset-button,
+  .settings-open-button,
   .mathpro-container > .back-button,
   .token-palette button,
-  .clear-board-button {
+  .clear-board-button,
+  .timed-drill-start,
+  .settings-close-button {
     min-height: 44px;
   }
 
@@ -654,6 +822,16 @@ h2 {
 
   .count-inputs input {
     min-height: 42px;
+  }
+
+  .timed-drill-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 640px) {
+  .timed-drill-grid {
+    grid-template-columns: 1fr;
   }
 }
 
