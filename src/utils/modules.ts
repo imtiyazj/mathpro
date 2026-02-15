@@ -2,6 +2,7 @@ import {
   type MathProblem,
   generateAdditionSubtractionProblem,
   generateBaseTenBlocksProblem,
+  generateCompareNumbersProblem,
   generateDragAndDropProblem,
   generateNumberBondProblem,
   generateTimedNoCarryNoBorrowProblem,
@@ -46,6 +47,12 @@ export const LEARNING_MODULES: LearningModule[] = [
     title: 'Timed Add/Sub Drill',
     description: '1-digit and 2-digit, no carry or borrowing.',
     generator: generateTimedNoCarryNoBorrowProblem,
+  },
+  {
+    id: 'compare-numbers',
+    title: 'Compare Numbers',
+    description: 'Practice greater than, less than, and in-between numbers.',
+    generator: generateCompareNumbersProblem,
   },
 ];
 

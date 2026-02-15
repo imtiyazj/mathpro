@@ -397,3 +397,69 @@ export const generateTimedNoCarryNoBorrowProblem = (level = 1): MathProblem => {
     },
   };
 };
+
+export const generateCompareNumbersProblem = (): MathProblem => {
+  const lessThanBase = randomInt(15, 90);
+  const lessCorrect = randomInt(0, lessThanBase - 1);
+  const lessWrongA = randomInt(lessThanBase, 99);
+  const lessWrongB = randomInt(lessThanBase, 99);
+
+  const lowBound = randomInt(10, 79);
+  const highBound = randomInt(lowBound + 2, 99);
+  const inBetween = randomInt(lowBound + 1, highBound - 1);
+
+  const compareA = randomInt(10, 99);
+  let compareB = randomInt(10, 99);
+  while (compareB === compareA) {
+    compareB = randomInt(10, 99);
+  }
+  const greater = Math.max(compareA, compareB);
+  const lesser = Math.min(compareA, compareB);
+
+  const gapStart = randomInt(10, 85);
+  const gapEnd = randomInt(gapStart + 2, 99);
+  const gapMiddle = randomInt(gapStart + 1, gapEnd - 1);
+
+  const nameA = randomChoice(STUDENT_NAMES);
+  const nameB = randomChoice(STUDENT_NAMES.filter((name) => name !== nameA));
+  const item = randomChoice(COUNT_ITEMS);
+  const biggerCount = randomInt(35, 99);
+  const smallerCount = randomInt(10, biggerCount - 1);
+
+  const templates: MathProblem[] = [
+    {
+      question: `Which number is less than ${lessThanBase}?`,
+      answer: lessCorrect,
+      format: 'multiple-choice',
+      options: shuffleNumbers([lessCorrect, lessWrongA, lessWrongB]),
+    },
+    {
+      question: `Which number is greater than ${lowBound} and less than ${highBound}?`,
+      answer: inBetween,
+      format: 'multiple-choice',
+      options: shuffleNumbers([inBetween, lowBound, highBound]),
+    },
+    {
+      question: `Compare ${compareA} and ${compareB}. Which number is greater?`,
+      answer: greater,
+      format: 'input',
+    },
+    {
+      question: `Compare ${compareA} and ${compareB}. Which number is less?`,
+      answer: lesser,
+      format: 'input',
+    },
+    {
+      question: `Fill in the blank: ${gapStart} < __ < ${gapEnd}`,
+      answer: gapMiddle,
+      format: 'input',
+    },
+    {
+      question: `${nameA} has ${biggerCount} ${item}. ${nameB} has ${smallerCount} ${item}. How many more ${item} does ${nameA} have?`,
+      answer: biggerCount - smallerCount,
+      format: 'input',
+    },
+  ];
+
+  return randomChoice(templates);
+};
